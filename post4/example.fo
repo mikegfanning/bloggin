@@ -1,0 +1,23 @@
+<fo:root xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:bc="http://barcode4j.krysalis.org/ns">
+    <fo:layout-master-set>
+        <fo:simple-page-master master-name="main" page-height="11.0in" page-width="8.5in">
+            <fo:region-body margin="1.0in"/>
+        </fo:simple-page-master>
+    </fo:layout-master-set>
+
+    <fo:page-sequence master-reference="main">
+        <fo:flow flow-name="xsl-region-body">
+            <fo:block font="18pt Times">Example</fo:block>
+            <fo:block>
+
+                <!-- Here's the important part! -->
+                <fo:instream-foreign-object>
+                    <bc:barcode message="PO654321">
+                        <bc:code128/>
+                    </bc:barcode>
+                </fo:instream-foreign-object>
+
+            </fo:block>
+        </fo:flow>
+    </fo:page-sequence>
+</fo:root>
