@@ -1,0 +1,23 @@
+<html>
+	<head>
+		<title>Barcode Scanning Example</title>
+	</head>
+	<body>
+		<h1>Barcode Scanning AJAX Example</h1>
+		
+		<script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+		<script src="wedge.js" type="text/javascript"></script>
+		<script type="text/javascript">
+			Wedge(document, {
+				startChar: '1',
+				endChar: '2',
+				ctrlKey: true,
+				onScanEnd: function(data) {
+					$.post('http://localhost/barcode.html', { post-data: data }, function(data) {
+						alert(data);
+					});
+				}
+			});			
+		</script>
+	</body>
+</html>
