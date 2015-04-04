@@ -25,7 +25,7 @@ function Wedge(object, options) {
 
 	function scanCheck(e) {
 
-		var c = String.fromCharCode(e.which);
+		var c = String.fromCharCode(parseInt(e.keyIdentifier.substr(2), 16)).toLowerCase();
 
 		if (modsMatch(e) && options.startChar == c) {
 			barcodeStart = true;
@@ -37,7 +37,7 @@ function Wedge(object, options) {
 			barcodeStart = false;
 			options.onScanEnd(barcodeData);
 		} else if (barcodeStart) {
-			barcodeData = barcodeData + c;
+			barcodeData = barcodeData + (e.shiftKey ? c.toUpperCase() : c);
 		}
 
 	}
