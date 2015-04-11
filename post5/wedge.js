@@ -5,54 +5,53 @@
  * the behavior of the listener. The default options are defined below:
  *
  * {
- *   startChar: '',
- *   endChar: '',
+ *   startSeq: [],
+ *   endSeq: [],
  *   onScanStart: undefined,
  *   onScanEnd: undefined,
- *   ctrlKey: false,
- *   altKey: false,
- *   shiftKey: false,
- *   metaKey: false
  * }
  * 
- * The startChar, endChar and onScanEnd options are required.
+ * The "startSeq" and "endSeq" options are arrays of key codes that a keyboard wedge
+ * barcode scanner will send before and after barcode data. The "onScanStart" option
+ * is not required.
  */
 function Wedge(object, options) {
 
-	object.onkeypress = scanCheck;
-	var barcodeStart = false;
-	var barcodeData = '';
+    var scanning = false;
+    var seqIndex = 0;
+    var barcodeData = [];
+    object.onkeypress = keyHandler;
 
-	function scanCheck(e) {
+    // Check to see if we're scanning a start or end sequence. "func" is a callback
+    // to execute when we get to the end of the sequence.
+    function seqCompare(keyCode, seq, func) {
+        if (keyCode != seq[seqIndex]) {
+            seqIndex = (seq[0] == keyCode) ? 1 : 0;
+        } else if (++seqIndex == seq.length) {
+            func();
+            seqIndex = 0;
+        }
+    }
 
-		var c = String.fromCharCode(parseInt(e.keyIdentifier.substr(2), 16)).toLowerCase();
+    function keyHandler(e) {
+        if (scanning) {
+            barcodeData.push(e.keyCode);
+            seqCompare(e.keyCode, options.endSeq, function() {
+                scanning = false;
 
-		if (modsMatch(e) && options.startChar == c) {
-			barcodeStart = true;
-			barcodeData = '';
-			if (options.onScanStart !== undefined) {
-				options.onScanStart();
-			}
-		} else if (modsMatch(e) && barcodeStart && options.endChar == c) {
-			barcodeStart = false;
-			options.onScanEnd(barcodeData);
-		} else if (barcodeStart) {
-			barcodeData = barcodeData + (e.shiftKey ? c.toUpperCase() : c);
-		}
-
-	}
-
-	// Not XOR function
-	function nxor(b1, b2) {
-		return (b1 && b2) || (!b1 && !b2);
-	}
-
-	// Compare the modifier keys from the options against the key event.
-	function modsMatch(e) {
-		return nxor(options.ctrlKey, e.ctrlKey) &&
-			nxor(options.altKey, e.altKey) &&
-			nxor(options.shiftKey, e.shiftKey) &&
-			nxor(options.metaKey, e.metaKey);
-	}
+                // Trim end sequence from barcode data and invoke end callback.
+                var l = barcodeData.length - options.endSeq.length;
+                options.onScanEnd(barcodeData.slice(0, l));
+                barcodeData = [];
+            });
+        } else {
+            seqCompare(e.keyCode, options.startSeq, function() {
+                scanning = true;
+                if (options.onScanStart !== undefined) {
+                    options.onScanStart();
+                }
+            });
+        }
+    }
 
 }
