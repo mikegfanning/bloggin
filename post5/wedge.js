@@ -22,17 +22,6 @@ function Wedge(object, options) {
     var barcodeData = [];
     object.onkeypress = keyHandler;
 
-    // Check to see if we're scanning a start or end sequence. "func" is a callback
-    // to execute when we get to the end of the sequence.
-    function seqCompare(keyCode, seq, func) {
-        if (keyCode != seq[seqIndex]) {
-            seqIndex = (seq[0] == keyCode) ? 1 : 0;
-        } else if (++seqIndex == seq.length) {
-            func();
-            seqIndex = 0;
-        }
-    }
-
     function keyHandler(e) {
         if (scanning) {
             barcodeData.push(e.keyCode);
@@ -53,5 +42,15 @@ function Wedge(object, options) {
             });
         }
     }
-
+    
+    // Check to see if we're scanning a start or end sequence. "func" is a callback
+    // to execute when we get to the end of the sequence.
+    function seqCompare(keyCode, seq, func) {
+        if (keyCode != seq[seqIndex]) {
+            seqIndex = (seq[0] == keyCode) ? 1 : 0;
+        } else if (++seqIndex == seq.length) {
+            func();
+            seqIndex = 0;
+        }
+    }
 }
