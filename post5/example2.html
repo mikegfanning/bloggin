@@ -9,12 +9,12 @@
 		<script src="wedge.js" type="text/javascript"></script>
 		<script type="text/javascript">
 			Wedge(document, {
-				startChar: '1',
-				endChar: '2',
-				ctrlKey: true,
+				startSeq: [33, 33, 94],
+				endSeq: [94, 33, 33],
 				onScanEnd: function(data) {
-					$.post('http://localhost/barcode.html', { post-data: data }, function(data) {
-						alert(data);
+					var str = String.fromCharCode.apply(this, data);
+					$.post('http://localhost/barcode.html', { 'post-data': str }, function() {
+						alert(str);
 					});
 				}
 			});			

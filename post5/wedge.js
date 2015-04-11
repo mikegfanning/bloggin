@@ -42,7 +42,7 @@ function Wedge(object, options) {
             });
         }
     }
-    
+
     // Check to see if we're scanning a start or end sequence. "func" is a callback
     // to execute when we get to the end of the sequence.
     function seqCompare(keyCode, seq, func) {

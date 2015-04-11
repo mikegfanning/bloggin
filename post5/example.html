@@ -10,11 +10,11 @@
 		<script src="wedge.js" type="text/javascript"></script>
 		<script type="text/javascript">
 			Wedge(document, {
-				startChar: '1',
-				endChar: '2',
-				ctrlKey: true,
+				startSeq: [1],
+				endSeq: [2],
 				onScanEnd: function(data) {
-					document.getElementById('barcode-data').value = data;
+					var str = String.fromCharCode.apply(this, data);
+					document.getElementById('barcode-data').value = str;
 					document.getElementById('barcode-form').submit();
 				}
 			});			
