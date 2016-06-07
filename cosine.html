@@ -1,0 +1,214 @@
+<html>
+	<head>
+		<title>Cosine Similarity Visualization</title>
+	</head>
+	<body>
+		<center style="margin-top: 100px">
+			<canvas id="normCanvas" width="600" height="600" style="margin-right: 20px"></canvas>
+			<canvas id="canvas" width="600" height="600"></canvas>
+			<form>
+				<div>
+					<label for="x">X</label>
+					<input id="x" type="text"/>
+				</div>
+				<div>
+					<label for="y">Y</label>
+					<input id="y" type="text"/>
+				</div>
+				<div>
+					<label for="speed">Animation Speed</label>
+					<input id="speed" type="text" value="500"/>
+				</div>
+				<div>
+					<input id="start" type="submit" value="Start"/>
+				</div>
+			</form>
+		</center>
+		<script type="text/javascript">
+
+			var axisPadding = 40;
+			var axisUnit = 25;
+			var axisTickWidth = 10;
+
+			var current = { x: 0, y: 0 };
+
+			document.getElementById('x').value = Math.floor(Math.random() * ((canvas.width - axisPadding) / axisUnit)) + 1;
+			document.getElementById('y').value = Math.floor(Math.random() * ((canvas.height - axisPadding) / axisUnit)) + 1;
+
+			function init() {
+
+				var canvas = document.getElementById('canvas');
+				var ctx = canvas.getContext('2d');
+
+				window.setInterval(draw, document.getElementById('speed').value);
+
+			}
+
+			function clone(vec2d) {
+				return { x: vec2d.x, y: vec2d.y };
+			}
+
+			function norm(vec2d) {
+				var result = { x: vec2d.x, y: vec2d.y };
+				var scale = Math.sqrt(Math.pow(vec2d.x, 2) + Math.pow(vec2d.y, 2));
+				result.x /= scale;
+				result.y /= scale;
+				return result;
+			}
+
+			function dot(vec1, vec2) {
+				return (vec1.x * vec2.x) + (vec1.y * vec2.y);
+			}
+
+			function similarity(vec1, vec2) {
+				return dot(norm(vec1), norm(vec2));
+			}
+
+			function draw() {
+
+				var canvas = document.getElementById('canvas');
+				var ctx = canvas.getContext('2d');
+
+				// Clear canvas
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+				// Get the origin to make things simpler
+				var origin = { x: axisPadding, y: canvas.height - axisPadding};
+
+				// Draw axes
+				ctx.lineWidth = 3;
+
+				ctx.beginPath();
+				ctx.moveTo(axisPadding, 0);
+				ctx.lineTo(axisPadding, canvas.height);
+				ctx.stroke();
+
+				ctx.beginPath();
+				ctx.moveTo(0, canvas.height - axisPadding);
+				ctx.lineTo(canvas.width, canvas.height - axisPadding);
+				ctx.stroke();				
+
+				ctx.lineWidth = 1;
+
+				// Draw axis tick marks
+				var i = - Math.floor(axisPadding / axisUnit);
+				while (i <= (canvas.height - axisPadding) / axisUnit) {
+					var tickY = origin.y - (i * axisUnit);
+
+					ctx.beginPath();
+					ctx.moveTo(origin.x - axisTickWidth, tickY);
+					ctx.lineTo(origin.x + axisTickWidth, tickY);
+					ctx.stroke();
+
+					i++; 
+				}
+
+				i = - Math.floor(axisPadding / axisUnit);
+				while (i <= (canvas.width - axisPadding) / axisUnit) {
+					var tickX = origin.x + (i * axisUnit);
+
+					ctx.beginPath();
+					ctx.moveTo(tickX, origin.y - axisTickWidth);
+					ctx.lineTo(tickX, origin.y + axisTickWidth);
+					ctx.stroke();
+
+					i++;
+				}
+
+				// Draw target vector
+				ctx.save();
+
+				var target = { x: document.getElementById('x').value, y: document.getElementById('y').value };
+				ctx.strokeStyle = 'rgb(255, 0, 0)';
+				ctx.lineWidth = 2;
+
+				ctx.beginPath();
+				ctx.moveTo(origin.x, origin.y);
+				ctx.lineTo(origin.x + (target.x * axisUnit), origin.y - (target.y * axisUnit)); 
+				ctx.stroke();
+
+				ctx.restore();
+
+				// Draw current vector
+				ctx.save();
+
+				ctx.strokeStyle = 'rgb(0, 0, 255)';
+				ctx.lineWidth = 2;
+
+				ctx.beginPath();
+				ctx.moveTo(origin.x, origin.y);
+				ctx.lineTo(origin.x + (current.x * axisUnit), origin.y - (current.y * axisUnit));
+				ctx.stroke();
+
+				ctx.restore();
+
+
+				// Draw normalized vectors	
+				var normCanvas = document.getElementById('normCanvas');
+				ctx = normCanvas.getContext('2d');
+
+				ctx.clearRect(0, 0, normCanvas.width, normCanvas.height);
+				origin = { x: axisPadding, y: normCanvas.height - axisPadding };
+
+				ctx.lineWidth = 3;
+
+				// Draw Axes for normalized vectors
+				ctx.beginPath();
+				ctx.moveTo(axisPadding, 0);
+				ctx.lineTo(axisPadding, normCanvas.height);
+				ctx.stroke();
+
+				ctx.beginPath();
+				ctx.moveTo(0, normCanvas.height - axisPadding);
+				ctx.lineTo(normCanvas.width, normCanvas.height - axisPadding);
+				ctx.stroke();
+
+				// Target normalized vector
+				var normScale = { x: normCanvas.width * 0.75, y: normCanvas.height * 0.75 };
+				var normTarget = norm(target);
+
+				ctx.save();
+				ctx.lineWidth = 2;
+				ctx.strokeStyle = 'rgb(255, 0, 0)';
+
+				ctx.beginPath();
+				ctx.moveTo(origin.x, origin.y);
+				ctx.lineTo(axisPadding + (normScale.x * normTarget.x), normCanvas.height - axisPadding - (normScale.y * normTarget.y));							
+				ctx.stroke();
+				ctx.restore();
+
+				// Current normalized vector
+				var normCurrent = norm(current);
+
+				ctx.save();
+				ctx.lineWidth = 2;
+				ctx.strokeStyle = 'rgb(0, 0, 255)';
+
+				ctx.beginPath();
+				ctx.moveTo(origin.x, origin.y);
+				ctx.lineTo(axisPadding + (normScale.x * normCurrent.x), normCanvas.height - axisPadding - (normScale.y * normCurrent.y));
+				ctx.stroke();
+				ctx.restore();
+
+				// Update current vector to next best fit
+				var tempX = clone(current);
+				tempX.x++;
+				var tempY = clone(current);
+				tempY.y++;
+
+				if (similarity(target, tempX) > similarity(target, tempY)) {
+					current = tempX;
+				} else {
+					current = tempY;
+				}
+
+			}
+
+			document.getElementById('start').onclick = function(e) {
+				e.preventDefault();
+				init();
+			}
+		
+		</script>
+	</body>
+</html>
